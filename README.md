@@ -1,2 +1,3 @@
-# twixter
-Useless insight about my twitter profile
+# Twixter
+
+Useless insights about my twitter profile.
