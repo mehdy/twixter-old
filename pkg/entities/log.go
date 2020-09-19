@@ -6,6 +6,8 @@ type Logger interface {
 	As(level int8) Logger
 	// WithField adds a pair of key/value to the log entry.
 	WithField(key string, value interface{}) Logger
+	// WithError adds an error value to the log entry.
+	WithError(err error) Logger
 	// Logf emits the log message with formatting capabilities.
 	Logf(msg string, args ...interface{})
 }
