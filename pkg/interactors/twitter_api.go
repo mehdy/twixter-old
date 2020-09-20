@@ -2,6 +2,8 @@ package interactors
 
 import "github.com/mehdy/twixter/pkg/entities"
 
+//go:generate mockgen -destination=../mocks/gomock_twitter_api.go -package=mocks . TwitterAPI
+
 // TwitterAPI defines core functionalities for Twitter API.
 type TwitterAPI interface {
 	// Profile returns the TwitterProfile of the given username.
