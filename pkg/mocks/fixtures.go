@@ -1,6 +1,7 @@
 package mocks
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,16 +19,16 @@ const (
 	DefaultTweetsCount     = 10
 )
 
-func GenerateProfile() *entities.TwitterProfile {
+func GenerateProfile(suffix string) *entities.TwitterProfile {
 	id := uuid.New()
 
 	return &entities.TwitterProfile{
 		TwitterID:        id.String(),
 		ID:               id,
-		Name:             "TEST_NAME",
-		Username:         "TEST_USERNAME",
-		Location:         "TEST_LOCATION",
-		Bio:              "TEST_BIO",
+		Name:             fmt.Sprintf("TEST_NAME_%s", suffix),
+		Username:         fmt.Sprintf("TEST_USERNAME_%s", suffix),
+		Location:         fmt.Sprintf("TEST_LOCATION_%s", suffix),
+		Bio:              fmt.Sprintf("TEST_BIO_%s", suffix),
 		URL:              "https://test.tld",
 		Email:            "test@mail.tld",
 		ProfileBannerURL: "https://test.tld/fake/banner",
