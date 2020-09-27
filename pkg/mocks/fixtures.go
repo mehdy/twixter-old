@@ -2,6 +2,7 @@ package mocks
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/google/uuid"
@@ -45,4 +46,20 @@ func GenerateProfile(suffix string) *entities.TwitterProfile {
 		},
 		JoinedAt: time.Now().Add(-YearDuration),
 	}
+}
+
+func GenerateProfileBatches(totalProfiles, batchSize int) [][]*entities.TwitterProfile {
+	batchCount := int(math.Ceil(float64(totalProfiles) / float64(batchSize)))
+	profileMocks := [][]*entities.TwitterProfile{}
+
+	for i := 0; i < batchCount; i++ {
+		profiles := []*entities.TwitterProfile{}
+		for j := 0; j < batchSize; j++ {
+			profiles = append(profiles, GenerateProfile(fmt.Sprintf("%d_%d", i, j)))
+		}
+
+		profileMocks = append(profileMocks, profiles)
+	}
+
+	return profileMocks
 }
