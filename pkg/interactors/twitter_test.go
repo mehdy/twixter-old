@@ -42,7 +42,7 @@ func TestTiwtterIntractor(suiteT *testing.T) {
 		twitterAPIMock *mocks.MockTwitterAPI,
 		storeMock *mocks.MockStore,
 	) {
-		profileMock := mocks.GenerateProfile()
+		profileMock := mocks.GenerateProfile("A")
 		twitterAPIMock.EXPECT().Profile(gomock.Eq(profileMock.Username)).Return(profileMock, nil)
 		storeMock.EXPECT().SaveProfile(gomock.Eq(profileMock)).Return(nil)
 
@@ -78,7 +78,7 @@ func TestTiwtterIntractor(suiteT *testing.T) {
 	) {
 		expectedErr := errors.New("failed to save profile")
 
-		profileMock := mocks.GenerateProfile()
+		profileMock := mocks.GenerateProfile("A")
 		twitterAPIMock.EXPECT().Profile(gomock.Eq(profileMock.Username)).Return(profileMock, nil)
 		storeMock.EXPECT().SaveProfile(gomock.Eq(profileMock)).Return(expectedErr)
 
