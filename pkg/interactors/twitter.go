@@ -28,21 +28,21 @@ func (t *Twitter) UpdateFollowers(username string) error {
 func (t *Twitter) UpdateProfile(username string) error {
 	profile, err := t.twitter.Profile(username)
 	if err != nil {
-		t.logger.As("E").Logf("Failed to fetch profile from the twitter API")
+		t.logger.As("E").WithError(err).Logf("Failed to fetch profile from the twitter API")
 
 		return newError(err, "failed to update profile")
 	}
 
-	t.logger.As("D").Logf("Fetched the profile of %q from the twitter API successfully", username)
+	t.logger.As("D").WithField("username", username).Logf("Fetched the profile from the twitter API successfully")
 
 	err = t.store.SaveProfile(profile)
 	if err != nil {
-		t.logger.As("E").Logf("Failed to store profile")
+		t.logger.As("E").WithError(err).Logf("Failed to store profile")
 
 		return newError(err, "failed to update profile")
 	}
 
-	t.logger.As("D").Logf("Stored the profile of %q successfully", username)
+	t.logger.As("D").WithField("username", username).Logf("Stored the profile successfully")
 
 	return nil
 }
