@@ -34,10 +34,10 @@ func (m *MockTwitterAPI) EXPECT() *MockTwitterAPIMockRecorder {
 }
 
 // Followers mocks base method
-func (m *MockTwitterAPI) Followers(arg0 string) ([]*entities.TwitterProfile, error) {
+func (m *MockTwitterAPI) Followers(arg0 string) (chan []*entities.TwitterProfile, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Followers", arg0)
-	ret0, _ := ret[0].([]*entities.TwitterProfile)
+	ret0, _ := ret[0].(chan []*entities.TwitterProfile)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -49,10 +49,10 @@ func (mr *MockTwitterAPIMockRecorder) Followers(arg0 interface{}) *gomock.Call {
 }
 
 // Followings mocks base method
-func (m *MockTwitterAPI) Followings(arg0 string) ([]*entities.TwitterProfile, error) {
+func (m *MockTwitterAPI) Followings(arg0 string) (chan []*entities.TwitterProfile, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Followings", arg0)
-	ret0, _ := ret[0].([]*entities.TwitterProfile)
+	ret0, _ := ret[0].(chan []*entities.TwitterProfile)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
