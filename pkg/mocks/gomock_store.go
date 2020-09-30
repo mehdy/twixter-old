@@ -33,6 +33,34 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
+// AddFollowers mocks base method
+func (m *MockStore) AddFollowers(arg0 *entities.TwitterProfile, arg1 []*entities.TwitterProfile) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddFollowers", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddFollowers indicates an expected call of AddFollowers
+func (mr *MockStoreMockRecorder) AddFollowers(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFollowers", reflect.TypeOf((*MockStore)(nil).AddFollowers), arg0, arg1)
+}
+
+// AddFollowings mocks base method
+func (m *MockStore) AddFollowings(arg0 *entities.TwitterProfile, arg1 []*entities.TwitterProfile) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddFollowings", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddFollowings indicates an expected call of AddFollowings
+func (mr *MockStoreMockRecorder) AddFollowings(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFollowings", reflect.TypeOf((*MockStore)(nil).AddFollowings), arg0, arg1)
+}
+
 // GetProfile mocks base method
 func (m *MockStore) GetProfile(arg0 string) (*entities.TwitterProfile, error) {
 	m.ctrl.T.Helper()
@@ -60,4 +88,18 @@ func (m *MockStore) SaveProfile(arg0 *entities.TwitterProfile) error {
 func (mr *MockStoreMockRecorder) SaveProfile(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveProfile", reflect.TypeOf((*MockStore)(nil).SaveProfile), arg0)
+}
+
+// SaveProfiles mocks base method
+func (m *MockStore) SaveProfiles(arg0 []*entities.TwitterProfile) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveProfiles", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveProfiles indicates an expected call of SaveProfiles
+func (mr *MockStoreMockRecorder) SaveProfiles(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveProfiles", reflect.TypeOf((*MockStore)(nil).SaveProfiles), arg0)
 }

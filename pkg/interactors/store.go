@@ -10,4 +10,10 @@ type Store interface {
 	GetProfile(username string) (*entities.TwitterProfile, error)
 	// SaveProfile stores the given TwitterProfile.
 	SaveProfile(profile *entities.TwitterProfile) error
+	// SaveProfiles stores a batch of TwitterProfiles.
+	SaveProfiles(profiles []*entities.TwitterProfile) error
+	// AddFollowings appends the list of profiles to the profile's followings
+	AddFollowings(profile *entities.TwitterProfile, profiles []*entities.TwitterProfile) error
+	// AddFollowers appends the list of profiles to the profile's followers
+	AddFollowers(profile *entities.TwitterProfile, profiles []*entities.TwitterProfile) error
 }
