@@ -82,7 +82,31 @@ func (t *Twitter) UpdateFollowings(username string) error {
 }
 
 func (t *Twitter) UpdateFollowers(username string) error {
-	panic("not implemented") // TODO: Implement
+	profile, err := t.store.GetProfile(username)
+	if err != nil {
+		t.logger.As("E").WithError(err).WithField("username", username).Logf("Failed to fetch profile from store")
+
+		return newError(err, "failed to fetch profile")
+	}
+
+	followersCh, err := t.twitter.Followers(username)
+	if err != nil {
+		t.logger.As("E").WithError(err).WithField("username", username).
+			Logf("Failed to fetch followers from the twitter API")
+
+		return newError(err, "failed to fetch followers")
+	}
+
+	t.logger.As("D").WithField("username", username).Logf("Fetched the followers from the twitter API successfully")
+
+	successfulCount, failedCount := t.updateProfiles(profile, followersCh, false)
+	t.logger.As("I").
+		WithField("username", username).
+		WithField("successful", successfulCount).
+		WithField("failed", failedCount).
+		Logf("Updated profile followers")
+
+	return nil
 }
 
 func (t *Twitter) UpdateProfile(username string) error {
