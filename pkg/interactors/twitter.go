@@ -17,8 +17,68 @@ func NewTwitter(logger entities.Logger, twitter TwitterAPI, store Store) *Twitte
 	return &Twitter{logger: logger, twitter: twitter, store: store}
 }
 
+func (t *Twitter) updateProfiles(
+	profile *entities.TwitterProfile,
+	listOfProfilesCh chan []*entities.TwitterProfile,
+	following bool,
+) (int, int) {
+	successfulCount, failedCount := 0, 0
+
+	for listOfProfiles := range listOfProfilesCh {
+		if err := t.store.SaveProfiles(listOfProfiles); err != nil {
+			t.logger.As("W").WithError(err).Logf("Failed to update a batch of profiles")
+			failedCount++
+
+			continue
+		}
+
+		var err error
+		if following {
+			err = t.store.AddFollowings(profile, listOfProfiles)
+		} else {
+			err = t.store.AddFollowers(profile, listOfProfiles)
+		}
+
+		if err != nil {
+			t.logger.As("W").WithError(err).Logf("Failed to update the relations")
+			failedCount++
+
+			continue
+		}
+
+		t.logger.As("D").Logf("Updated a batch of profiles successfully")
+		successfulCount++
+	}
+
+	return successfulCount, failedCount
+}
+
 func (t *Twitter) UpdateFollowings(username string) error {
-	panic("not implemented") // TODO: Implement
+	profile, err := t.store.GetProfile(username)
+	if err != nil {
+		t.logger.As("E").WithError(err).WithField("username", username).Logf("Failed to fetch profile from store")
+
+		return newError(err, "failed to fetch profile")
+	}
+
+	followingsCh, err := t.twitter.Followings(username)
+	if err != nil {
+		t.logger.As("E").WithError(err).WithField("username", username).
+			Logf("Failed to fetch followings from the twitter API")
+
+		return newError(err, "failed to fetch followings")
+	}
+
+	t.logger.As("D").WithField("username", username).Logf("Fetched the followings from the twitter API successfully")
+
+	successfulCount, failedCount := t.updateProfiles(profile, followingsCh, true)
+	t.logger.As("I").
+		WithField("username", username).
+		WithField("successful", successfulCount).
+		WithField("failed", failedCount).
+		Logf("Updated profile followings")
+
+	return nil
 }
 
 func (t *Twitter) UpdateFollowers(username string) error {
