@@ -1,4 +1,4 @@
-// nolint: goerr113, funlen
+// nolint: goerr113, funlen, dupl, goconst
 package interactors_test
 
 import (
@@ -84,6 +84,81 @@ func TestTiwtterIntractor(suiteT *testing.T) {
 
 		if err := twitter.UpdateProfile(profileMock.Username); !errors.Is(err, expectedErr) {
 			t.Logf("Failed to handle failed store: %s", err)
+			t.Fail()
+		}
+	})
+
+	run("UpdateFollowingsSuccessfully", func(
+		t *testing.T,
+		twitter entities.TwitterInteractor,
+		twitterAPIMock *mocks.MockTwitterAPI,
+		storeMock *mocks.MockStore,
+	) {
+		const (
+			totalProfiles = 10
+			batchSize     = 2
+		)
+
+		profile := mocks.GenerateProfile("A")
+		profileMocks := mocks.GenerateProfileBatches(totalProfiles, batchSize)
+
+		storeMock.EXPECT().GetProfile(gomock.Eq(profile.Username)).Return(profile, nil)
+
+		storeCalls := []*gomock.Call{}
+		for _, profileBatch := range profileMocks {
+			storeCalls = append(storeCalls,
+				storeMock.EXPECT().SaveProfiles(gomock.Eq(profileBatch)),
+				storeMock.EXPECT().AddFollowings(gomock.Eq(profile), gomock.Eq(profileBatch)),
+			)
+		}
+		gomock.InOrder(storeCalls...)
+
+		followingsCh := make(chan []*entities.TwitterProfile)
+		twitterAPIMock.EXPECT().Followings(gomock.Eq(profile.Username)).Return(followingsCh, nil)
+		go func() {
+			for _, profileBatch := range profileMocks {
+				followingsCh <- profileBatch
+			}
+			close(followingsCh)
+		}()
+
+		if err := twitter.UpdateFollowings(profile.Username); err != nil {
+			t.Logf("Failed to update profile's followings successfully: %s", err)
+			t.Fail()
+		}
+	})
+
+	run("UpdateFollowingsOfNonExistentProfile", func(
+		t *testing.T,
+		twitter entities.TwitterInteractor,
+		twitterAPIMock *mocks.MockTwitterAPI,
+		storeMock *mocks.MockStore,
+	) {
+		username := "NonExistent"
+		expectedErr := errors.New("profile not found")
+
+		storeMock.EXPECT().GetProfile(gomock.Eq(username)).Return(nil, expectedErr)
+
+		if err := twitter.UpdateFollowings(username); !errors.Is(err, expectedErr) {
+			t.Logf("Failed to handle non-existent profile: %s", err)
+			t.Fail()
+		}
+	})
+
+	run("UpdateFollowingsFailedTwitterAPI", func(
+		t *testing.T,
+		twitter entities.TwitterInteractor,
+		twitterAPIMock *mocks.MockTwitterAPI,
+		storeMock *mocks.MockStore,
+	) {
+		profile := mocks.GenerateProfile("A")
+		storeMock.EXPECT().GetProfile(gomock.Eq(profile.Username)).Return(profile, nil)
+
+		expectedErr := errors.New("failed to fetch followings")
+		twitterAPIMock.EXPECT().Followings(gomock.Eq(profile.Username)).Return(nil, expectedErr)
+
+		if err := twitter.UpdateFollowings(profile.Username); !errors.Is(err, expectedErr) {
+			t.Logf("Failed to handle failed twitter API: %s", err)
 			t.Fail()
 		}
 	})
