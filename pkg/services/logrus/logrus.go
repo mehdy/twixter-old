@@ -17,6 +17,7 @@ type Logger struct {
 
 type Entry struct {
 	*logrus.Entry
+	level logrus.Level
 }
 
 func NewLogger(config entities.ConfigGetter) *Logger {
@@ -27,40 +28,39 @@ func NewLogger(config entities.ConfigGetter) *Logger {
 }
 
 func (e *Entry) As(level string) entities.Logger {
-	e.Level = toLogrusLevel(level)
+	e.level = toLogrusLevel(level)
 
 	return e
 }
 
 func (e *Entry) WithField(key string, value interface{}) entities.Logger {
-	e.Entry.WithField(key, value)
+	e.Entry = e.Entry.WithField(key, value)
 
 	return e
 }
 
 func (e *Entry) WithError(err error) entities.Logger {
-	e.Entry.WithError(err)
+	e.Entry = e.Entry.WithError(err)
 
 	return e
 }
 
 func (e *Entry) Logf(msg string, args ...interface{}) {
-	e.Entry.Logf(e.Level, msg, args...)
+	e.Entry.Logf(e.level, msg, args...)
 }
 
 func (l *Logger) As(level string) entities.Logger {
-	e := &Entry{logrus.NewEntry(l.Logger)}
-	e.Level = toLogrusLevel(level)
+	e := &Entry{logrus.NewEntry(l.Logger), toLogrusLevel(level)}
 
 	return e
 }
 
 func (l *Logger) WithField(key string, value interface{}) entities.Logger {
-	return &Entry{l.Logger.WithField(key, value)}
+	return &Entry{l.Logger.WithField(key, value), toLogrusLevel("")}
 }
 
 func (l *Logger) WithError(err error) entities.Logger {
-	return &Entry{l.Logger.WithError(err)}
+	return &Entry{l.Logger.WithError(err), toLogrusLevel("")}
 }
 
 func (l *Logger) Logf(msg string, args ...interface{}) {
