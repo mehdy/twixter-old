@@ -61,6 +61,36 @@ func (mr *MockStoreMockRecorder) AddFollowings(arg0, arg1 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddFollowings", reflect.TypeOf((*MockStore)(nil).AddFollowings), arg0, arg1)
 }
 
+// GetFollowers mocks base method
+func (m *MockStore) GetFollowers(arg0 string) ([]*entities.TwitterProfile, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFollowers", arg0)
+	ret0, _ := ret[0].([]*entities.TwitterProfile)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFollowers indicates an expected call of GetFollowers
+func (mr *MockStoreMockRecorder) GetFollowers(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFollowers", reflect.TypeOf((*MockStore)(nil).GetFollowers), arg0)
+}
+
+// GetFollowings mocks base method
+func (m *MockStore) GetFollowings(arg0 string) ([]*entities.TwitterProfile, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFollowings", arg0)
+	ret0, _ := ret[0].([]*entities.TwitterProfile)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFollowings indicates an expected call of GetFollowings
+func (mr *MockStoreMockRecorder) GetFollowings(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFollowings", reflect.TypeOf((*MockStore)(nil).GetFollowings), arg0)
+}
+
 // GetProfile mocks base method
 func (m *MockStore) GetProfile(arg0 string) (*entities.TwitterProfile, error) {
 	m.ctrl.T.Helper()

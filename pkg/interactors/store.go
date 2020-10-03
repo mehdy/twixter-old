@@ -16,4 +16,8 @@ type Store interface {
 	AddFollowings(profile *entities.TwitterProfile, profiles []*entities.TwitterProfile) error
 	// AddFollowers appends the list of profiles to the profile's followers
 	AddFollowers(profile *entities.TwitterProfile, profiles []*entities.TwitterProfile) error
+	// GetFollowings returns the list of profiles followed by the given username.
+	GetFollowings(username string) ([]*entities.TwitterProfile, error)
+	// GetFollowers returns the list of profiles following the given username.
+	GetFollowers(username string) ([]*entities.TwitterProfile, error)
 }
