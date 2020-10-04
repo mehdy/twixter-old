@@ -45,7 +45,7 @@ type TwitterInteractor interface {
 	UpdateProfile(username string) error
 	// UpdateNetwork updates the followings and followers of the given username as requested
 	// and theirs as well until the given depth.
-	UpdateNetwork(username string, followings, followers bool, depth int) error
+	UpdateNetwork(username string, followings, followers bool, depth int)
 
 	// GetTopFollowingsByFollowers returns a limited list of TwitterProfiles followed by the given username
 	// sorted by followers count.
