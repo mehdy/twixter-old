@@ -131,8 +131,88 @@ func (t *Twitter) UpdateProfile(username string) error {
 	return nil
 }
 
-func (t *Twitter) UpdateNetwork(username string, followings bool, followers bool, depth int) error {
-	panic("not implemented") // TODO: Implement
+func (t *Twitter) updateFollowingNetwork(username string, depth int) {
+	usernames := []string{username}
+
+	for i := 0; i < depth; i++ {
+		for _, un := range usernames {
+			if err := t.UpdateFollowings(un); err != nil {
+				t.logger.As("W").
+					WithError(err).
+					WithField("username", un).
+					WithField("depth", i).
+					Logf("Failed to update followings")
+			} else {
+				t.logger.As("D").
+					WithField("username", un).
+					WithField("depth", i).
+					Logf("Updated followings")
+			}
+
+			followings, err := t.store.GetFollowings(un)
+			if err != nil {
+				t.logger.As("W").
+					WithError(err).
+					WithField("username", username).
+					WithField("depth", i).
+					Logf("Failed to get followings from store")
+
+				return
+			}
+
+			usernames = []string{}
+			for _, profile := range followings {
+				usernames = append(usernames, profile.Username)
+			}
+		}
+	}
+}
+
+func (t *Twitter) updateFollowerNetwork(username string, depth int) {
+	usernames := []string{username}
+
+	for i := 0; i < depth; i++ {
+		for _, un := range usernames {
+			if err := t.UpdateFollowers(un); err != nil {
+				t.logger.As("W").
+					WithError(err).
+					WithField("username", un).
+					WithField("depth", i).
+					Logf("Failed to update followers")
+			} else {
+				t.logger.As("D").
+					WithField("username", un).
+					WithField("depth", i).
+					Logf("Updated followings")
+			}
+
+			followings, err := t.store.GetFollowers(un)
+			if err != nil {
+				t.logger.As("W").
+					WithError(err).
+					WithField("username", username).
+					WithField("depth", i).
+					Logf("Failed to get followers from store")
+
+				return
+			}
+
+			usernames = []string{}
+			for _, profile := range followings {
+				usernames = append(usernames, profile.Username)
+			}
+		}
+	}
+}
+
+func (t *Twitter) UpdateNetwork(username string, followings bool, followers bool, depth int) {
+	if followings {
+		t.updateFollowingNetwork(username, depth)
+	}
+
+	if followers {
+		t.updateFollowerNetwork(username, depth)
+	}
 }
 
 func (t *Twitter) GetTopFollowingsByFollowers(username string, limit int) ([]*entities.TwitterProfile, error) {
