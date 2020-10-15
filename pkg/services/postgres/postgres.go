@@ -37,6 +37,17 @@ func NewTwitter(config entities.ConfigGetter, logger entities.Logger) *Twitter {
 	}
 }
 
+func (t *Twitter) GetProfile(username string) (*entities.TwitterProfile, error) {
+	tp := &TwitterProfile{}
+	if err := t.db.Where(&TwitterProfile{Username: username}).First(tp).Error; err != nil {
+		t.logger.As("E").WithError(err).WithField("username", username).Logf("Failed to get Profile from database")
+
+		return nil, newError(err, "failed to fetch profile from database")
+	}
+
+	return t.asTwitterProfile(tp), nil
+}
+
 func (t *Twitter) SaveProfile(profile *entities.TwitterProfile) error {
 	tp := t.fromTwitterProfile(profile)
 
@@ -75,6 +86,38 @@ func (t *Twitter) fromTwitterProfile(profile *entities.TwitterProfile) *TwitterP
 		ListedCount:         profile.ListedCount,
 		TweetsCount:         profile.TweetsCount,
 		Entities:            entitesJSON,
+		JoinedAt:            profile.JoinedAt,
+	}
+}
+
+func (t *Twitter) asTwitterProfile(profile *TwitterProfile) *entities.TwitterProfile {
+	var ent map[string]interface{}
+
+	err := json.Unmarshal(profile.Entities, &ent)
+	if err != nil {
+		t.logger.As("W").WithError(err).Logf("Failed to serialize profile.Entities")
+	}
+
+	return &entities.TwitterProfile{
+		TwitterID:           profile.TwitterID,
+		Name:                profile.Name,
+		Username:            profile.Username,
+		Location:            profile.Location,
+		Bio:                 profile.Bio,
+		URL:                 profile.URL,
+		Email:               profile.Email,
+		ProfileBannerURL:    profile.ProfileBannerURL,
+		ProfileImageURL:     profile.ProfileImageURL,
+		Verified:            profile.Verified,
+		Protected:           profile.Protected,
+		DefaultProfile:      profile.DefaultProfile,
+		DefaultProfileImage: profile.DefaultProfileImage,
+		FollowersCount:      profile.FollowersCount,
+		FollowingsCount:     profile.FollowingsCount,
+		FavouritesCount:     profile.FavouritesCount,
+		ListedCount:         profile.ListedCount,
+		TweetsCount:         profile.TweetsCount,
+		Entities:            ent,
 		JoinedAt:            profile.JoinedAt,
 	}
 }
