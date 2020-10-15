@@ -13,6 +13,7 @@ import (
 const (
 	// nolint: gosec // no credentials
 	twitterTokenURL = "https://api.twitter.com/oauth2/token"
+	maxFetchCount   = 200
 )
 
 type Twitter struct {
@@ -46,6 +47,51 @@ func (t *Twitter) Profile(username string) (*entities.TwitterProfile, error) {
 	defer resp.Body.Close()
 
 	return t.asTwitterProfile(*user), nil
+}
+
+func (t *Twitter) fetchFollowings(username string, followingsCh chan []*entities.TwitterProfile) {
+	skipStatus := true
+	includeUserEntities := true
+
+	var cursor int64 = -1
+
+	for cursor != 0 {
+		following, resp, err := t.api.Friends.List(&twitter.FriendListParams{
+			ScreenName:          username,
+			Count:               maxFetchCount,
+			Cursor:              cursor,
+			SkipStatus:          &skipStatus,
+			IncludeUserEntities: &includeUserEntities,
+		})
+		if err != nil {
+			t.logger.As("W").
+				WithError(err).
+				WithField("username", username).
+				Logf("Failed to fetch followings from twitter API")
+
+			close(followingsCh)
+
+			return
+		}
+		defer resp.Body.Close()
+
+		cursor = following.NextCursor
+
+		profiles := []*entities.TwitterProfile{}
+		for _, u := range following.Users {
+			profiles = append(profiles, t.asTwitterProfile(u))
+		}
+
+		followingsCh <- profiles
+	}
+}
+
+func (t *Twitter) Followings(username string) (chan []*entities.TwitterProfile, error) {
+	followingsCh := make(chan []*entities.TwitterProfile)
+
+	go t.fetchFollowings(username, followingsCh)
+
+	return followingsCh, nil
 }
 
 func (t *Twitter) asTwitterProfile(user twitter.User) *entities.TwitterProfile {
