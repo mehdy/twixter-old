@@ -49,12 +49,19 @@ func (t *Twitter) GetProfile(username string) (*entities.TwitterProfile, error) 
 }
 
 func (t *Twitter) SaveProfile(profile *entities.TwitterProfile) error {
-	tp := t.fromTwitterProfile(profile)
+	return t.SaveProfiles([]*entities.TwitterProfile{profile})
+}
 
-	if err := t.db.Create(tp).Error; err != nil {
-		t.logger.As("E").WithError(err).WithField("username", profile.Username).Logf("Failed to save Profile")
+func (t *Twitter) SaveProfiles(profiles []*entities.TwitterProfile) error {
+	tps := []*TwitterProfile{}
+	for _, tp := range profiles {
+		tps = append(tps, t.fromTwitterProfile(tp))
+	}
 
-		return newError(err, "failed to save profile")
+	if err := t.db.Create(tps).Error; err != nil {
+		t.logger.As("E").WithError(err).Logf("Failed to create Profiles in database")
+
+		return newError(err, "failed to save profiles in database")
 	}
 
 	return nil
