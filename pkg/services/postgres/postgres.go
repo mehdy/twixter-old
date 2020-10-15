@@ -67,6 +67,26 @@ func (t *Twitter) SaveProfiles(profiles []*entities.TwitterProfile) error {
 	return nil
 }
 
+func (t *Twitter) AddFollowings(profile *entities.TwitterProfile, profiles []*entities.TwitterProfile) error {
+	tp := t.fromTwitterProfile(profile)
+
+	for _, p := range profiles {
+		fp := t.fromTwitterProfile(p)
+		tp.Followings = append(tp.Followings, *fp)
+	}
+
+	if err := t.db.Session(&gorm.Session{FullSaveAssociations: true}).Updates(tp).Error; err != nil {
+		t.logger.As("E").
+			WithError(err).
+			WithField("username", profile.Username).
+			Logf("Failed to add followings in database")
+
+		return newError(err, "failed to add followings in database")
+	}
+
+	return nil
+}
+
 func (t *Twitter) fromTwitterProfile(profile *entities.TwitterProfile) *TwitterProfile {
 	entitesJSON, err := json.Marshal(profile.Entities)
 	if err != nil {
