@@ -86,12 +86,57 @@ func (t *Twitter) fetchFollowings(username string, followingsCh chan []*entities
 	}
 }
 
+func (t *Twitter) fetchFollowers(username string, followersCh chan []*entities.TwitterProfile) {
+	skipStatus := true
+	includeUserEntities := true
+
+	var cursor int64 = -1
+
+	for cursor != 0 {
+		follower, resp, err := t.api.Friends.List(&twitter.FriendListParams{
+			ScreenName:          username,
+			Count:               maxFetchCount,
+			Cursor:              cursor,
+			SkipStatus:          &skipStatus,
+			IncludeUserEntities: &includeUserEntities,
+		})
+		if err != nil {
+			t.logger.As("W").
+				WithError(err).
+				WithField("username", username).
+				Logf("Failed to fetch followers from twitter API")
+
+			close(followersCh)
+
+			return
+		}
+		defer resp.Body.Close()
+
+		cursor = follower.NextCursor
+
+		profiles := []*entities.TwitterProfile{}
+		for _, u := range follower.Users {
+			profiles = append(profiles, t.asTwitterProfile(u))
+		}
+
+		followersCh <- profiles
+	}
+}
+
 func (t *Twitter) Followings(username string) (chan []*entities.TwitterProfile, error) {
 	followingsCh := make(chan []*entities.TwitterProfile)
 
 	go t.fetchFollowings(username, followingsCh)
 
 	return followingsCh, nil
+}
+
+func (t *Twitter) Followers(username string) (chan []*entities.TwitterProfile, error) {
+	followersCh := make(chan []*entities.TwitterProfile)
+
+	go t.fetchFollowers(username, followersCh)
+
+	return followersCh, nil
 }
 
 func (t *Twitter) asTwitterProfile(user twitter.User) *entities.TwitterProfile {
