@@ -1,8 +1,10 @@
 package postgres
 
 import (
+	"encoding/json"
 	"fmt"
 
+	"github.com/mehdy/twixter/pkg/entities"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -32,5 +34,47 @@ func NewTwitter(config entities.ConfigGetter, logger entities.Logger) *Twitter {
 	return &Twitter{
 		db:     db,
 		logger: logger,
+	}
+}
+
+func (t *Twitter) SaveProfile(profile *entities.TwitterProfile) error {
+	tp := t.fromTwitterProfile(profile)
+
+	if err := t.db.Create(tp).Error; err != nil {
+		t.logger.As("E").WithError(err).WithField("username", profile.Username).Logf("Failed to save Profile")
+
+		return newError(err, "failed to save profile")
+	}
+
+	return nil
+}
+
+func (t *Twitter) fromTwitterProfile(profile *entities.TwitterProfile) *TwitterProfile {
+	entitesJSON, err := json.Marshal(profile.Entities)
+	if err != nil {
+		t.logger.As("W").WithError(err).Logf("Failed to serialize profile.Entities")
+	}
+
+	return &TwitterProfile{
+		TwitterID:           profile.TwitterID,
+		Name:                profile.Name,
+		Username:            profile.Username,
+		Location:            profile.Location,
+		Bio:                 profile.Bio,
+		URL:                 profile.URL,
+		Email:               profile.Email,
+		ProfileBannerURL:    profile.ProfileBannerURL,
+		ProfileImageURL:     profile.ProfileImageURL,
+		Verified:            profile.Verified,
+		Protected:           profile.Protected,
+		DefaultProfile:      profile.DefaultProfile,
+		DefaultProfileImage: profile.DefaultProfileImage,
+		FollowersCount:      profile.FollowersCount,
+		FollowingsCount:     profile.FollowingsCount,
+		FavouritesCount:     profile.FavouritesCount,
+		ListedCount:         profile.ListedCount,
+		TweetsCount:         profile.TweetsCount,
+		Entities:            entitesJSON,
+		JoinedAt:            profile.JoinedAt,
 	}
 }
