@@ -119,6 +119,18 @@ func (t *Twitter) GetFollowings(username string) ([]*entities.TwitterProfile, er
 	return followings, nil
 }
 
+func (t *Twitter) GetFollowers(username string) ([]*entities.TwitterProfile, error) {
+	followers := []*entities.TwitterProfile{}
+	if err := t.db.Model(&TwitterProfile{Username: username}).
+		Association("Followings").Find(&followers); err != nil {
+		t.logger.As("E").WithError(err).WithField("username", username).Logf("Failed to get followers from database")
+
+		return nil, newError(err, "failed to get followers from database")
+	}
+
+	return followers, nil
+}
+
 func (t *Twitter) fromTwitterProfile(profile *entities.TwitterProfile) *TwitterProfile {
 	entitesJSON, err := json.Marshal(profile.Entities)
 	if err != nil {
