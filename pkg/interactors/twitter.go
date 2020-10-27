@@ -216,7 +216,16 @@ func (t *Twitter) UpdateNetwork(username string, followings bool, followers bool
 }
 
 func (t *Twitter) GetTopFollowingsByFollowers(username string, limit int) ([]*entities.TwitterProfile, error) {
-	panic("not implemented") // TODO: Implement
+	profiles, err := t.store.GetTopFollowingsByFollowers(username, limit)
+	if err != nil {
+		t.logger.As("E").
+			WithError(err).
+			WithField("username", username).
+			WithField("limit", limit).
+			Logf("Failed to get top followings by followers")
+		return nil, newError(err, "failed to get top followings by followers")
+	}
+	return profiles, nil
 }
 
 func (t *Twitter) GetTopFollowersByFollowers(username string, limit int) ([]*entities.TwitterProfile, error) {
