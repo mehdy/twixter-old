@@ -243,7 +243,17 @@ func (t *Twitter) GetTopFollowersByFollowers(username string, limit int) ([]*ent
 
 func (t *Twitter) GetTopFollowedByFollowings(username string, followed bool, limit int) (
 	[]*entities.TwitterProfile, error) {
-	panic("not implemented") // TODO: Implement
+	profiles, err := t.store.GetTopFollowedByFollowings(username, followed, limit)
+	if err != nil {
+		t.logger.As("E").
+			WithError(err).
+			WithField("username", username).
+			WithField("limit", followed).
+			WithField("limit", limit).
+			Logf("Failed to get top followed by followings")
+		return nil, newError(err, "failed to get top followed by followings")
+	}
+	return profiles, nil
 }
 
 func (t *Twitter) GetTopFollowedByFollowers(username string, followed bool, limit int) (
