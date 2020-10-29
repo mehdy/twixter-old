@@ -272,5 +272,13 @@ func (t *Twitter) GetTopFollowedByFollowers(username string, followed bool, limi
 }
 
 func (t *Twitter) GetVerifiedFollowers(username string) ([]*entities.TwitterProfile, error) {
-	panic("not implemented") // TODO: Implement
+	profiles, err := t.store.GetVerifiedFollowers(username)
+	if err != nil {
+		t.logger.As("E").
+			WithError(err).
+			WithField("username", username).
+			Logf("Failed to get verified followers")
+		return nil, newError(err, "failed to get verified followers")
+	}
+	return profiles, nil
 }
