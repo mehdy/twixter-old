@@ -223,8 +223,10 @@ func (t *Twitter) GetTopFollowingsByFollowers(username string, limit int) ([]*en
 			WithField("username", username).
 			WithField("limit", limit).
 			Logf("Failed to get top followings by followers")
+
 		return nil, newError(err, "failed to get top followings by followers")
 	}
+
 	return profiles, nil
 }
 
@@ -236,8 +238,10 @@ func (t *Twitter) GetTopFollowersByFollowers(username string, limit int) ([]*ent
 			WithField("username", username).
 			WithField("limit", limit).
 			Logf("Failed to get top followers by followers")
+
 		return nil, newError(err, "failed to get top followers by followers")
 	}
+
 	return profiles, nil
 }
 
@@ -251,8 +255,10 @@ func (t *Twitter) GetTopFollowedByFollowings(username string, followed bool, lim
 			WithField("limit", followed).
 			WithField("limit", limit).
 			Logf("Failed to get top followed by followings")
+
 		return nil, newError(err, "failed to get top followed by followings")
 	}
+
 	return profiles, nil
 }
 
@@ -266,8 +272,10 @@ func (t *Twitter) GetTopFollowedByFollowers(username string, followed bool, limi
 			WithField("limit", followed).
 			WithField("limit", limit).
 			Logf("Failed to get top followed by followers")
+
 		return nil, newError(err, "failed to get top followed by followers")
 	}
+
 	return profiles, nil
 }
 
@@ -278,7 +286,9 @@ func (t *Twitter) GetVerifiedFollowers(username string) ([]*entities.TwitterProf
 			WithError(err).
 			WithField("username", username).
 			Logf("Failed to get verified followers")
+
 		return nil, newError(err, "failed to get verified followers")
 	}
+
 	return profiles, nil
 }
