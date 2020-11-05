@@ -153,6 +153,28 @@ func (t *Twitter) GetTopFollowingsByFollowers(username string, limit int) ([]*en
 	return results, nil
 }
 
+func (t *Twitter) GetTopFollowersByFollowers(username string, limit int) ([]*entities.TwitterProfile, error) {
+	profiles := []*TwitterProfile{}
+	if err := t.db.Model(&TwitterProfile{Username: username}).
+		Association("Followers").Find(&profiles); err != nil {
+		t.logger.
+			As("E").
+			WithError(err).
+			WithField("username", username).
+			WithField("limit", limit).
+			Logf("Failed to get top followers by followers")
+
+		return nil, newError(err, "failed to get top followers by followers")
+	}
+
+	results := []*entities.TwitterProfile{}
+	for _, profile := range profiles {
+		results = append(results, t.asTwitterProfile(profile))
+	}
+
+	return results, nil
+}
+
 func (t *Twitter) fromTwitterProfile(profile *entities.TwitterProfile) *TwitterProfile {
 	entitesJSON, err := json.Marshal(profile.Entities)
 	if err != nil {
